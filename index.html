@@ -14,9 +14,38 @@
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
+            padding-bottom: 100px;
             background-color: #f8f8f8;
             display: flex;
             flex-wrap: wrap;
+        }
+
+        .sticky-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 2px solid #B8123D;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .sticky-footer #total {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            margin: 0;
+        }
+
+        .sticky-footer #reset-button {
+            width: auto;
+            padding: 12px 30px;
+            margin: 0;
         }
 
         .header {
@@ -340,13 +369,16 @@
     </div>
     <div class="cart-container">
         <div class="cart-items" id="cart"></div>
-        <div id="total">Totalt: 0 kr</div>
-        <button id="reset-button">Avsluta kund</button>
         <button id="admin-button">Ändra utbud och priser</button>
         <div id="order-history">
             <h3>Orderhistorik</h3>
             <div id="order-history-list"></div>
         </div>
+    </div>
+
+    <div class="sticky-footer">
+        <div id="total">Totalt: 0 kr</div>
+        <button id="reset-button">Avsluta kund</button>
     </div>
 
     <div id="admin-modal" class="modal">
