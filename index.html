@@ -50,12 +50,28 @@
 
         .header {
             width: 100%;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
         }
 
         .header img {
             height: 80px;
+        }
+
+        .header #admin-button {
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .order-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #B8123D;
         }
 
         .products-container {
@@ -363,13 +379,14 @@
 <body>
     <div class="header">
         <img src="Logga.png" alt="Årsta AIK">
+        <button id="admin-button">Ändra utbud och priser</button>
     </div>
     <div class="products-container">
         <div id="products-container"></div>
     </div>
     <div class="cart-container">
+        <div class="order-title">Order</div>
         <div class="cart-items" id="cart"></div>
-        <button id="admin-button">Ändra utbud och priser</button>
         <div id="order-history">
             <h3>Orderhistorik</h3>
             <div id="order-history-list"></div>
