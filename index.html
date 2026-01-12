@@ -657,7 +657,8 @@
                 quantityControl.appendChild(plusButton);
 
                 const itemInfo = document.createElement('span');
-                itemInfo.innerHTML = `<strong>${item.quantity} x ${item.name}</strong> (${item.price} kr)`;
+                const priceText = item.quantity > 1 ? `(à ${item.price} kr)` : `(${item.price} kr)`;
+                itemInfo.innerHTML = `<strong>${item.quantity} x ${item.name}</strong> ${priceText}`;
 
                 cartItemElement.appendChild(itemInfo);
                 cartItemElement.appendChild(quantityControl);
@@ -670,7 +671,7 @@
                 const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                 const summaryElement = document.createElement('div');
                 summaryElement.className = 'cart-summary';
-                summaryElement.innerHTML = `<strong>Summa: ${total} kr</strong>`;
+                summaryElement.innerHTML = `<strong>Totalt: ${total} kr</strong>`;
                 cart.appendChild(summaryElement);
             }
 
