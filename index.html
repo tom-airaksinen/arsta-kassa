@@ -155,6 +155,16 @@
             flex-direction: column;
         }
 
+        @media (min-width: 700px) {
+            .cart-container {
+                position: sticky;
+                top: 20px;
+                align-self: flex-start;
+                max-height: calc(100vh - 140px);
+                overflow-y: auto;
+            }
+        }
+
         .cart-items {
             flex-grow: 1;
             overflow-y: auto;
