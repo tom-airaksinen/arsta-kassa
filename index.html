@@ -271,6 +271,31 @@
         #order-history h3 {
             color: #000;
             margin-top: 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        #order-history h3::after {
+            content: '▼';
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        #order-history h3.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        #order-history-list {
+            transition: max-height 0.3s ease, opacity 0.2s ease;
+            overflow: hidden;
+        }
+
+        #order-history-list.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
         }
 
         .receipt {
@@ -423,8 +448,8 @@
         <div class="order-title">Order</div>
         <div class="cart-items" id="cart"></div>
         <div id="order-history">
-            <h3>Orderhistorik</h3>
-            <div id="order-history-list"></div>
+            <h3 id="history-header" class="collapsed">Orderhistorik</h3>
+            <div id="order-history-list" class="collapsed"></div>
         </div>
     </div>
 
@@ -488,6 +513,7 @@
         const resetButton = document.getElementById('reset-button');
         const adminButton = document.getElementById('admin-button');
         const orderHistoryList = document.getElementById('order-history-list');
+        const historyHeader = document.getElementById('history-header');
         const adminModal = document.getElementById('admin-modal');
         const adminTextarea = document.getElementById('admin-textarea');
         const saveButton = document.getElementById('save-button');
@@ -734,10 +760,14 @@
         function renderOrderHistory() {
             orderHistoryList.innerHTML = '';
 
+            // Uppdatera rubriken med antal ordrar
             if (orderHistory.length === 0) {
+                historyHeader.textContent = 'Orderhistorik';
                 orderHistoryList.innerHTML = '<div class="empty-state">Inga ordrar lagda än</div>';
                 return;
             }
+
+            historyHeader.textContent = `Orderhistorik (${orderHistory.length})`;
 
             orderHistory.forEach(order => {
                 const receipt = document.createElement('div');
@@ -765,6 +795,11 @@
         adminButton.onclick = openAdminModal;
         saveButton.onclick = saveAdminChanges;
         cancelButton.onclick = closeAdminModal;
+
+        historyHeader.onclick = () => {
+            historyHeader.classList.toggle('collapsed');
+            orderHistoryList.classList.toggle('collapsed');
+        };
 
         addPressEffect(resetButton);
         addPressEffect(adminButton);
