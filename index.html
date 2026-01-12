@@ -169,6 +169,15 @@
             border-radius: 5px;
         }
 
+        .cart-summary {
+            padding: 10px;
+            margin-top: 10px;
+            border-top: 2px solid #B8123D;
+            text-align: right;
+            font-size: 18px;
+            color: #B8123D;
+        }
+
         .quantity-control {
             display: flex;
             align-items: center;
@@ -648,13 +657,23 @@
                 quantityControl.appendChild(plusButton);
 
                 const itemInfo = document.createElement('span');
-                itemInfo.innerHTML = `<strong>${item.name}</strong> (${item.price} kr)`;
+                itemInfo.innerHTML = `<strong>${item.quantity} x ${item.name}</strong> (${item.price} kr)`;
 
                 cartItemElement.appendChild(itemInfo);
                 cartItemElement.appendChild(quantityControl);
 
                 cart.appendChild(cartItemElement);
             });
+
+            // Lägg till summarad om det finns varor
+            if (cartItems.length > 0) {
+                const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const summaryElement = document.createElement('div');
+                summaryElement.className = 'cart-summary';
+                summaryElement.innerHTML = `<strong>Summa: ${total} kr</strong>`;
+                cart.appendChild(summaryElement);
+            }
+
             updateTotal();
         }
 
