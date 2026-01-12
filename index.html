@@ -197,18 +197,52 @@
 
         #order-history h3 {
             color: #000;
+            margin-top: 0;
         }
 
-        #order-history table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        #order-history th, #order-history td {
-            padding: 10px;
+        .receipt {
             border-bottom: 1px solid #ddd;
-            color: #000;
+            padding: 10px 0;
+            margin-bottom: 10px;
+        }
+
+        .receipt:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .receipt-time {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .receipt-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #B8123D;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #444;
+            padding: 2px 0;
+        }
+
+        .receipt-item-name {
+            flex: 1;
+        }
+
+        .receipt-item-subtotal {
+            font-weight: 500;
         }
 
         .modal {
@@ -311,16 +345,7 @@
         <button id="admin-button">Ändra utbud och priser</button>
         <div id="order-history">
             <h3>Orderhistorik</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tid</th>
-                        <th>Varor</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody id="order-history-table"></tbody>
-            </table>
+            <div id="order-history-list"></div>
         </div>
     </div>
 
@@ -378,7 +403,7 @@
         const totalDisplay = document.getElementById('total');
         const resetButton = document.getElementById('reset-button');
         const adminButton = document.getElementById('admin-button');
-        const orderHistoryTable = document.getElementById('order-history-table');
+        const orderHistoryList = document.getElementById('order-history-list');
         const adminModal = document.getElementById('admin-modal');
         const adminTextarea = document.getElementById('admin-textarea');
         const saveButton = document.getElementById('save-button');
@@ -594,15 +619,15 @@
         function resetCart() {
             if (cartItems.length === 0) return;
 
-            const currentTime = new Date().toLocaleString();
-            const orderItems = cartItems.map(item => `${item.quantity}x ${item.name} (${item.price} kr)`).join(', ');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
             const orderTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
             // Lägg till i början av arrayen istället för i slutet
             orderHistory.unshift({
-                time: currentTime,
-                items: orderItems,
-                total: `${orderTotal} kr`
+                time: timeStr,
+                items: cartItems.map(item => ({ ...item })),
+                total: orderTotal
             });
 
             renderOrderHistory();
@@ -612,15 +637,26 @@
         }
 
         function renderOrderHistory() {
-            orderHistoryTable.innerHTML = '';
+            orderHistoryList.innerHTML = '';
             orderHistory.forEach(order => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${order.time}</td>
-                    <td>${order.items}</td>
-                    <td>${order.total}</td>
+                const receipt = document.createElement('div');
+                receipt.className = 'receipt';
+
+                let itemsHtml = order.items.map(item => `
+                    <div class="receipt-item">
+                        <span class="receipt-item-name">${item.quantity}x ${item.name}</span>
+                        <span class="receipt-item-subtotal">${item.quantity * item.price} kr</span>
+                    </div>
+                `).join('');
+
+                receipt.innerHTML = `
+                    <div class="receipt-header">
+                        <span class="receipt-time">${order.time}</span>
+                        <span class="receipt-total">${order.total} kr</span>
+                    </div>
+                    ${itemsHtml}
                 `;
-                orderHistoryTable.appendChild(row);
+                orderHistoryList.appendChild(receipt);
             });
         }
 
