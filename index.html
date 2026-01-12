@@ -308,6 +308,13 @@
             font-weight: 500;
         }
 
+        .empty-state {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -716,6 +723,12 @@
 
         function renderOrderHistory() {
             orderHistoryList.innerHTML = '';
+
+            if (orderHistory.length === 0) {
+                orderHistoryList.innerHTML = '<div class="empty-state">Inga ordrar lagda än</div>';
+                return;
+            }
+
             orderHistory.forEach(order => {
                 const receipt = document.createElement('div');
                 receipt.className = 'receipt';
@@ -756,6 +769,7 @@
 
         loadProductsFromStorage();
         renderProducts();
+        renderOrderHistory();
     </script>
 </body>
 </html>
