@@ -258,19 +258,32 @@
             transform: scale(0.97);
         }
 
-        #order-history {
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            max-height: 300px;
+        .history-link {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .history-link a {
+            color: #B8123D;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .history-link a:hover {
+            text-decoration: underline;
+        }
+
+        .history-modal-content {
+            max-height: 70vh;
             overflow-y: auto;
         }
 
-        #order-history h3 {
-            color: #000;
+        .history-modal-content h2 {
             margin-top: 0;
+            color: #000;
         }
 
         .receipt {
@@ -422,9 +435,8 @@
     <div class="cart-container">
         <div class="order-title">Order</div>
         <div class="cart-items" id="cart"></div>
-        <div id="order-history">
-            <h3>Orderhistorik</h3>
-            <div id="order-history-list"></div>
+        <div class="history-link">
+            <a id="history-link">Inga ordrar än</a>
         </div>
     </div>
 
@@ -450,6 +462,16 @@
             <div class="modal-buttons">
                 <button class="save-button" id="save-button">Spara</button>
                 <button class="cancel-button" id="cancel-button">Avbryt</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="history-modal" class="modal">
+        <div class="modal-content history-modal-content">
+            <h2>Orderhistorik</h2>
+            <div id="history-modal-list"></div>
+            <div class="modal-buttons">
+                <button class="cancel-button" id="close-history-button">Stäng</button>
             </div>
         </div>
     </div>
@@ -487,7 +509,10 @@
         const totalDisplay = document.getElementById('total');
         const resetButton = document.getElementById('reset-button');
         const adminButton = document.getElementById('admin-button');
-        const orderHistoryList = document.getElementById('order-history-list');
+        const historyLink = document.getElementById('history-link');
+        const historyModal = document.getElementById('history-modal');
+        const historyModalList = document.getElementById('history-modal-list');
+        const closeHistoryButton = document.getElementById('close-history-button');
         const adminModal = document.getElementById('admin-modal');
         const adminTextarea = document.getElementById('admin-textarea');
         const saveButton = document.getElementById('save-button');
@@ -732,10 +757,22 @@
         }
 
         function renderOrderHistory() {
-            orderHistoryList.innerHTML = '';
+            // Uppdatera länktexten
+            if (orderHistory.length === 0) {
+                historyLink.textContent = 'Inga ordrar än';
+                historyLink.style.cursor = 'default';
+                historyLink.style.color = '#999';
+            } else {
+                historyLink.textContent = `Visa ${orderHistory.length} ${orderHistory.length === 1 ? 'order' : 'ordrar'}`;
+                historyLink.style.cursor = 'pointer';
+                historyLink.style.color = '#B8123D';
+            }
+
+            // Fyll modalen med historik
+            historyModalList.innerHTML = '';
 
             if (orderHistory.length === 0) {
-                orderHistoryList.innerHTML = '<div class="empty-state">Inga ordrar lagda än</div>';
+                historyModalList.innerHTML = '<div class="empty-state">Inga ordrar lagda än</div>';
                 return;
             }
 
@@ -757,23 +794,42 @@
                     </div>
                     ${itemsHtml}
                 `;
-                orderHistoryList.appendChild(receipt);
+                historyModalList.appendChild(receipt);
             });
+        }
+
+        function openHistoryModal() {
+            if (orderHistory.length > 0) {
+                historyModal.style.display = 'block';
+            }
+        }
+
+        function closeHistoryModal() {
+            historyModal.style.display = 'none';
         }
 
         resetButton.onclick = resetCart;
         adminButton.onclick = openAdminModal;
         saveButton.onclick = saveAdminChanges;
         cancelButton.onclick = closeAdminModal;
+        historyLink.onclick = openHistoryModal;
+        closeHistoryButton.onclick = closeHistoryModal;
 
         addPressEffect(resetButton);
         addPressEffect(adminButton);
         addPressEffect(saveButton);
         addPressEffect(cancelButton);
+        addPressEffect(closeHistoryButton);
 
         adminModal.onclick = (e) => {
             if (e.target === adminModal) {
                 closeAdminModal();
+            }
+        };
+
+        historyModal.onclick = (e) => {
+            if (e.target === historyModal) {
+                closeHistoryModal();
             }
         };
 
