@@ -49,6 +49,43 @@
             margin: 0;
         }
 
+        .cart-icon {
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            display: none;
+        }
+
+        .cart-icon.pulse {
+            animation: cartPulse 0.3s ease;
+        }
+
+        @keyframes cartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+
+        /* Mobil-anpassning */
+        @media (max-width: 699px) {
+            .cart-container {
+                display: none;
+            }
+
+            .products-container {
+                margin-right: 0;
+                flex: 1;
+            }
+
+            .cart-icon {
+                display: block;
+            }
+
+            .sticky-footer {
+                cursor: pointer;
+            }
+        }
+
         .header {
             width: 100%;
             display: flex;
@@ -440,7 +477,8 @@
         </div>
     </div>
 
-    <div class="sticky-footer">
+    <div class="sticky-footer" id="sticky-footer">
+        <span class="cart-icon" id="cart-icon">🛒</span>
         <div id="total">Totalt: 0 kr</div>
         <button id="reset-button">Avsluta kund</button>
     </div>
@@ -472,6 +510,18 @@
             <div id="history-modal-list"></div>
             <div class="modal-buttons">
                 <button class="cancel-button" id="close-history-button">Stäng</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <h2>Order</h2>
+            <div id="cart-modal-items"></div>
+            <div id="cart-modal-summary" class="cart-summary"></div>
+            <div class="modal-buttons">
+                <button class="save-button" id="cart-modal-checkout">Avsluta kund</button>
+                <button class="cancel-button" id="cart-modal-close">Fortsätt handla</button>
             </div>
         </div>
     </div>
@@ -513,6 +563,13 @@
         const historyModal = document.getElementById('history-modal');
         const historyModalList = document.getElementById('history-modal-list');
         const closeHistoryButton = document.getElementById('close-history-button');
+        const cartModal = document.getElementById('cart-modal');
+        const cartModalItems = document.getElementById('cart-modal-items');
+        const cartModalSummary = document.getElementById('cart-modal-summary');
+        const cartModalCheckout = document.getElementById('cart-modal-checkout');
+        const cartModalClose = document.getElementById('cart-modal-close');
+        const cartIcon = document.getElementById('cart-icon');
+        const stickyFooter = document.getElementById('sticky-footer');
         const adminModal = document.getElementById('admin-modal');
         const adminTextarea = document.getElementById('admin-textarea');
         const saveButton = document.getElementById('save-button');
@@ -674,6 +731,11 @@
             }
 
             renderCart();
+
+            // Animera kundvagnsikonen på mobil
+            cartIcon.classList.remove('pulse');
+            void cartIcon.offsetWidth; // Trigger reflow för att starta om animation
+            cartIcon.classList.add('pulse');
         }
 
         function renderCart() {
@@ -808,6 +870,68 @@
             historyModal.style.display = 'none';
         }
 
+        function openCartModal() {
+            renderCartModal();
+            cartModal.style.display = 'block';
+        }
+
+        function closeCartModal() {
+            cartModal.style.display = 'none';
+        }
+
+        function renderCartModal() {
+            cartModalItems.innerHTML = '';
+
+            if (cartItems.length === 0) {
+                cartModalItems.innerHTML = '<div class="empty-state">Inga varor i ordern</div>';
+                cartModalSummary.innerHTML = '';
+                return;
+            }
+
+            cartItems.forEach(item => {
+                const cartItemElement = document.createElement('div');
+                cartItemElement.className = 'cart-item';
+
+                const minusButton = document.createElement('button');
+                minusButton.textContent = '-';
+                minusButton.onclick = () => {
+                    changeQuantity(item.name, -1);
+                    renderCartModal();
+                };
+                addPressEffect(minusButton);
+
+                const plusButton = document.createElement('button');
+                plusButton.textContent = '+';
+                plusButton.onclick = () => {
+                    changeQuantity(item.name, 1);
+                    renderCartModal();
+                };
+                addPressEffect(plusButton);
+
+                const quantityControl = document.createElement('div');
+                quantityControl.className = 'quantity-control';
+                quantityControl.appendChild(minusButton);
+                quantityControl.appendChild(document.createTextNode(item.quantity));
+                quantityControl.appendChild(plusButton);
+
+                const itemInfo = document.createElement('span');
+                const priceText = item.quantity > 1 ? `(à ${item.price} kr)` : `(${item.price} kr)`;
+                itemInfo.innerHTML = `<strong>${item.quantity} x ${item.name}</strong> ${priceText}`;
+
+                cartItemElement.appendChild(itemInfo);
+                cartItemElement.appendChild(quantityControl);
+
+                cartModalItems.appendChild(cartItemElement);
+            });
+
+            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartModalSummary.innerHTML = `<strong>Totalt: ${total} kr</strong>`;
+        }
+
+        function isMobile() {
+            return window.innerWidth < 700;
+        }
+
         resetButton.onclick = resetCart;
         adminButton.onclick = openAdminModal;
         saveButton.onclick = saveAdminChanges;
@@ -815,11 +939,25 @@
         historyLink.onclick = openHistoryModal;
         closeHistoryButton.onclick = closeHistoryModal;
 
+        // Cart modal för mobil
+        stickyFooter.onclick = (e) => {
+            if (isMobile() && e.target !== resetButton) {
+                openCartModal();
+            }
+        };
+        cartModalClose.onclick = closeCartModal;
+        cartModalCheckout.onclick = () => {
+            closeCartModal();
+            resetCart();
+        };
+
         addPressEffect(resetButton);
         addPressEffect(adminButton);
         addPressEffect(saveButton);
         addPressEffect(cancelButton);
         addPressEffect(closeHistoryButton);
+        addPressEffect(cartModalCheckout);
+        addPressEffect(cartModalClose);
 
         adminModal.onclick = (e) => {
             if (e.target === adminModal) {
@@ -830,6 +968,12 @@
         historyModal.onclick = (e) => {
             if (e.target === historyModal) {
                 closeHistoryModal();
+            }
+        };
+
+        cartModal.onclick = (e) => {
+            if (e.target === cartModal) {
+                closeCartModal();
             }
         };
 
