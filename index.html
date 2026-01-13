@@ -127,11 +127,6 @@
             height: 80px;
         }
 
-        .header .greeting {
-            font-size: 18px;
-            font-weight: 500;
-            color: #333;
-        }
 
         .header #admin-button {
             width: auto;
@@ -499,7 +494,6 @@
 <body>
     <div class="header">
         <img src="Logga.png" alt="Årsta AIK">
-        <span class="greeting">Hej Hedvig!</span>
         <button id="admin-button">Ändra utbud och priser</button>
     </div>
     <div class="products-container">
@@ -528,7 +522,7 @@
         <div class="modal-content">
             <h2>Ändra utbud och priser</h2>
             <div class="help-text">
-                Skriv kategorinamn på en egen rad, följt av varor med pris.<br>
+                Skriv kategorinamn på en egen rad, följt av varor med pris, eller <a href="#" id="reset-to-default">återställ till standard</a>.<br>
                 Format: <strong>Varunamn Pris</strong><br>
                 Exempel:<br>
                 <code>
@@ -631,6 +625,7 @@
         const adminTextarea = document.getElementById('admin-textarea');
         const saveButton = document.getElementById('save-button');
         const cancelButton = document.getElementById('cancel-button');
+        const resetToDefault = document.getElementById('reset-to-default');
 
         let cartItems = [];
         let orderHistory = [];
@@ -998,6 +993,13 @@
         adminButton.onclick = openAdminModal;
         saveButton.onclick = saveAdminChanges;
         cancelButton.onclick = closeAdminModal;
+        resetToDefault.onclick = (e) => {
+            e.preventDefault();
+            productCategories = JSON.parse(JSON.stringify(defaultProductCategories));
+            saveProductsToStorage();
+            renderProducts();
+            closeAdminModal();
+        };
         historyLink.onclick = openHistoryModal;
         closeHistoryButton.onclick = closeHistoryModal;
 
