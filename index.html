@@ -123,14 +123,99 @@
             margin-bottom: 20px;
         }
 
-        .header img {
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-left .club-logo {
             height: 80px;
         }
 
+        .header-left .cafemeny-logo {
+            height: 50px;
+        }
+
+        @media (max-width: 699px) {
+            .header-left {
+                gap: 10px;
+            }
+            .header-left .club-logo {
+                height: 50px;
+            }
+            .header-left .cafemeny-logo {
+                height: 30px;
+            }
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
         .header #admin-button {
             width: auto;
             padding: 10px 20px;
+        }
+
+        .help-button {
+            background: none;
+            border: 2px solid #B8123D;
+            color: #B8123D;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .help-button:hover {
+            background: #B8123D;
+            color: white;
+        }
+
+        .help-content h2 {
+            margin-top: 0;
+            color: #B8123D;
+        }
+
+        .help-content h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .help-content p {
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .shortcut-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        .shortcut-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .shortcut-list li:last-child {
+            border-bottom: none;
+        }
+
+        .shortcut-key {
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
         }
 
         .order-title {
@@ -564,8 +649,14 @@
 </head>
 <body>
     <div class="header">
-        <img src="Logga.png" alt="Årsta AIK">
-        <button id="admin-button">Ändra utbud och priser</button>
+        <div class="header-left">
+            <img src="Logga.png" alt="Årsta AIK" class="club-logo">
+            <img src="cafemeny.png" alt="Cafémeny" class="cafemeny-logo">
+        </div>
+        <div class="header-right">
+            <button class="help-button" id="help-button">?</button>
+            <button id="admin-button">Ändra utbud och priser</button>
+        </div>
     </div>
     <div class="products-container">
         <div id="products-container"></div>
@@ -640,6 +731,28 @@
         </div>
     </div>
 
+    <div id="help-modal" class="modal">
+        <div class="modal-content help-content">
+            <h2>Kassaapp för Årsta AIK HF</h2>
+            <p>Tryck på produkter för att lägga till i ordern. När kunden har betalat, tryck "Avsluta kund".</p>
+
+            <h3>Tangentbordsgenvägar</h3>
+            <ul class="shortcut-list">
+                <li><span>Börja skriva</span> <span class="shortcut-key">Öppnar produktsök</span></li>
+                <li><span>Välj i listan</span> <span class="shortcut-key">↑ ↓</span></li>
+                <li><span>Lägg till produkt</span> <span class="shortcut-key">Enter</span></li>
+                <li><span>Avsluta kund</span> <span class="shortcut-key">Enter</span></li>
+                <li><span>Stäng/avbryt</span> <span class="shortcut-key">Escape</span></li>
+            </ul>
+            <p><strong>Tips:</strong> Skriv antal + produkt, t.ex. "2kaf" för 2 kaffe.</p>
+            <p style="color: #666; font-size: 13px;">Ändra produkter och priser via "Ändra utbud och priser"-knappen.</p>
+
+            <div class="modal-buttons">
+                <button class="save-button" id="close-help-button">Stäng</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const defaultProductCategories = [
             {
@@ -708,6 +821,9 @@
         const resetToDefault = document.getElementById('reset-to-default');
         const searchModal = document.getElementById('search-modal');
         const searchInput = document.getElementById('search-input');
+        const helpButton = document.getElementById('help-button');
+        const helpModal = document.getElementById('help-modal');
+        const closeHelpButton = document.getElementById('close-help-button');
         const searchResults = document.getElementById('search-results');
 
         let cartItems = [];
@@ -1276,9 +1392,24 @@
             // Ignorera om modal redan är öppen
             if (searchModal.style.display === 'block') return;
             if (adminModal.style.display === 'block') return;
+            if (helpModal.style.display === 'block') {
+                if (e.key === 'Escape' || e.key === 'Enter') {
+                    closeHelpModal();
+                }
+                return;
+            }
 
             // Ignorera modifieringstangenter
             if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+            // Enter = Avsluta kund
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (cartItems.length > 0) {
+                    resetCart();
+                }
+                return;
+            }
 
             // Endast bokstäver och siffror
             if (e.key.length === 1 && /[a-zA-ZåäöÅÄÖ0-9]/.test(e.key)) {
@@ -1286,6 +1417,23 @@
                 openSearchModal(e.key);
             }
         });
+
+        // Hjälp-modal
+        function openHelpModal() {
+            helpModal.style.display = 'block';
+        }
+
+        function closeHelpModal() {
+            helpModal.style.display = 'none';
+        }
+
+        helpButton.onclick = openHelpModal;
+        closeHelpButton.onclick = closeHelpModal;
+        helpModal.onclick = (e) => {
+            if (e.target === helpModal) {
+                closeHelpModal();
+            }
+        };
 
         loadProductsFromStorage();
         renderProducts();
