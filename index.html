@@ -405,6 +405,77 @@
             padding: 20px;
         }
 
+        .search-modal-content {
+            padding: 20px;
+            max-width: 400px;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #B8123D;
+            border-radius: 8px;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        #search-input:focus {
+            border-color: #B8123D;
+            box-shadow: 0 0 0 3px rgba(184, 18, 61, 0.2);
+        }
+
+        .search-result {
+            padding: 12px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            background: #f8f8f8;
+        }
+
+        .search-result.selected {
+            background: #B8123D;
+            color: white;
+        }
+
+        .search-result-name {
+            font-weight: 500;
+        }
+
+        .search-result-price {
+            color: #666;
+        }
+
+        .search-result.selected .search-result-price {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .search-result-quantity {
+            background: #ac965b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-left: 10px;
+        }
+
+        .search-hint {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+
+        .search-no-results {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -561,6 +632,14 @@
         </div>
     </div>
 
+    <div id="search-modal" class="modal">
+        <div class="modal-content search-modal-content">
+            <input type="text" id="search-input" placeholder="Sök produkt...">
+            <div id="search-results"></div>
+            <div class="search-hint">Enter = lägg till • Escape = stäng • Pil upp/ner = bläddra</div>
+        </div>
+    </div>
+
     <script>
         const defaultProductCategories = [
             {
@@ -573,6 +652,18 @@
                 ]
             },
             {
+                name: 'Dryck',
+                products: [
+                    { name: 'Kaffe', price: 25 },
+                    { name: 'Te', price: 20 },
+                    { name: 'Varm Oboy', price: 15 },
+                    { name: 'Vitamin Well', price: 30 },
+                    { name: 'Mineralvatten', price: 25 },
+                    { name: 'Läsk', price: 25 },
+                    { name: 'Festis/Mer', price: 15 }
+                ]
+            },
+            {
                 name: 'Snacks',
                 products: [
                     { name: 'Proteinbar', price: 30 },
@@ -582,18 +673,6 @@
                     { name: 'Kexchoklad', price: 15 },
                     { name: 'Delicato', price: 20 },
                     { name: 'Kanelbulle', price: 20 }
-                ]
-            },
-            {
-                name: 'Dryck',
-                products: [
-                    { name: 'Kaffe', price: 25 },
-                    { name: 'Te', price: 20 },
-                    { name: 'Varm O\'boy', price: 15 },
-                    { name: 'Vitamin Well', price: 30 },
-                    { name: 'Mineralvatten', price: 25 },
-                    { name: 'Läsk', price: 25 },
-                    { name: 'Festis/Mer', price: 15 }
                 ]
             },
             {
@@ -627,10 +706,14 @@
         const saveButton = document.getElementById('save-button');
         const cancelButton = document.getElementById('cancel-button');
         const resetToDefault = document.getElementById('reset-to-default');
+        const searchModal = document.getElementById('search-modal');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
 
         let cartItems = [];
         let orderHistory = [];
         let productCategories = [];
+        let searchSelectedIndex = 0;
 
         // Funktion för att lägga till press-effekt
         function addPressEffect(element) {
@@ -1041,6 +1124,168 @@
                 closeCartModal();
             }
         };
+
+        searchModal.onclick = (e) => {
+            if (e.target === searchModal) {
+                closeSearchModal();
+            }
+        };
+
+        // Tangentbordssök
+        function getAllProducts() {
+            const all = [];
+            productCategories.forEach(cat => {
+                cat.products.forEach(p => all.push(p));
+            });
+            return all;
+        }
+
+        function parseSearchQuery(query) {
+            const trimmed = query.trim();
+
+            // Kolla efter siffror i början: "2kaf" eller "2 kaf"
+            const leadingMatch = trimmed.match(/^(\d+)\s*(.+)$/);
+            if (leadingMatch && leadingMatch[2].trim()) {
+                return {
+                    searchText: leadingMatch[2].trim(),
+                    quantity: parseInt(leadingMatch[1])
+                };
+            }
+
+            // Kolla efter siffror i slutet: "kaf2" eller "kaf 2"
+            const trailingMatch = trimmed.match(/^(.+?)\s*(\d+)$/);
+            if (trailingMatch && trailingMatch[1].trim()) {
+                return {
+                    searchText: trailingMatch[1].trim(),
+                    quantity: parseInt(trailingMatch[2])
+                };
+            }
+
+            return { searchText: trimmed, quantity: 1 };
+        }
+
+        function searchProducts(query) {
+            if (!query.trim()) return [];
+
+            const { searchText } = parseSearchQuery(query);
+            const searchLower = searchText.toLowerCase();
+            const all = getAllProducts();
+
+            return all.filter(p =>
+                p.name.toLowerCase().includes(searchLower)
+            ).slice(0, 6);
+        }
+
+        function renderSearchResults(resetSelection = true) {
+            const query = searchInput.value;
+            const { quantity } = parseSearchQuery(query);
+            const results = searchProducts(query);
+
+            if (!query.trim()) {
+                searchResults.innerHTML = '';
+                searchSelectedIndex = 0;
+                return;
+            }
+
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="search-no-results">Inga träffar</div>';
+                searchSelectedIndex = 0;
+                return;
+            }
+
+            if (resetSelection) {
+                searchSelectedIndex = 0;
+            }
+            // Säkerställ att index är inom gränserna
+            if (searchSelectedIndex >= results.length) {
+                searchSelectedIndex = results.length - 1;
+            }
+
+            searchResults.innerHTML = results.map((product, i) => `
+                <div class="search-result${i === searchSelectedIndex ? ' selected' : ''}" data-index="${i}">
+                    <span class="search-result-name">${product.name}</span>
+                    <span>
+                        <span class="search-result-price">${product.price} kr</span>
+                        ${quantity > 1 ? `<span class="search-result-quantity">${quantity} st</span>` : ''}
+                    </span>
+                </div>
+            `).join('');
+
+            // Klick på resultat
+            searchResults.querySelectorAll('.search-result').forEach((el, i) => {
+                el.onclick = () => addSearchResult(results[i], quantity);
+            });
+        }
+
+        function addSearchResult(product, quantity) {
+            for (let i = 0; i < quantity; i++) {
+                addToCart(product);
+            }
+            closeSearchModal();
+        }
+
+        function openSearchModal(initialChar) {
+            searchInput.value = initialChar || '';
+            searchSelectedIndex = 0;
+            searchModal.style.display = 'block';
+            searchInput.focus();
+            renderSearchResults(true);
+        }
+
+        function closeSearchModal() {
+            searchModal.style.display = 'none';
+            searchInput.value = '';
+            searchResults.innerHTML = '';
+        }
+
+        searchInput.addEventListener('input', () => renderSearchResults(true));
+
+        searchInput.addEventListener('keydown', (e) => {
+            const results = searchProducts(searchInput.value);
+
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeSearchModal();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (results.length > 0) {
+                    const { quantity } = parseSearchQuery(searchInput.value);
+                    addSearchResult(results[searchSelectedIndex], quantity);
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (results.length > 0) {
+                    searchSelectedIndex = (searchSelectedIndex + 1) % results.length;
+                    renderSearchResults(false);
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (results.length > 0) {
+                    searchSelectedIndex = (searchSelectedIndex - 1 + results.length) % results.length;
+                    renderSearchResults(false);
+                }
+            }
+        });
+
+        // Globalt tangentbordslyssnande
+        document.addEventListener('keydown', (e) => {
+            // Ignorera om vi redan är i ett textfält
+            const tag = e.target.tagName.toLowerCase();
+            if (tag === 'input' || tag === 'textarea') return;
+
+            // Ignorera om modal redan är öppen
+            if (searchModal.style.display === 'block') return;
+            if (adminModal.style.display === 'block') return;
+
+            // Ignorera modifieringstangenter
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+            // Endast bokstäver och siffror
+            if (e.key.length === 1 && /[a-zA-ZåäöÅÄÖ0-9]/.test(e.key)) {
+                e.preventDefault();
+                openSearchModal(e.key);
+            }
+        });
 
         loadProductsFromStorage();
         renderProducts();
