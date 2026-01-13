@@ -50,9 +50,38 @@
         }
 
         .cart-icon {
-            font-size: 28px;
+            position: relative;
             cursor: pointer;
             transition: transform 0.15s ease;
+            display: none;
+            width: 32px;
+            height: 32px;
+        }
+
+        .cart-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: #B8123D;
+        }
+
+        .cart-icon .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #B8123D;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
+        .cart-icon .badge:empty {
             display: none;
         }
 
@@ -478,7 +507,12 @@
     </div>
 
     <div class="sticky-footer" id="sticky-footer">
-        <span class="cart-icon" id="cart-icon">🛒</span>
+        <div class="cart-icon" id="cart-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5.5 21a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm12 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM5.1 3H2V1h4.28l.72 2h15l-2.5 9H6.5L5.1 3zm1.44 4l1.1 4h11.18l1.39-5H6.72l-.18-.72-.1-.28z"/>
+            </svg>
+            <span class="badge" id="cart-badge"></span>
+        </div>
         <div id="total">Totalt: 0 kr</div>
         <button id="reset-button">Avsluta kund</button>
     </div>
@@ -569,6 +603,7 @@
         const cartModalCheckout = document.getElementById('cart-modal-checkout');
         const cartModalClose = document.getElementById('cart-modal-close');
         const cartIcon = document.getElementById('cart-icon');
+        const cartBadge = document.getElementById('cart-badge');
         const stickyFooter = document.getElementById('sticky-footer');
         const adminModal = document.getElementById('admin-modal');
         const adminTextarea = document.getElementById('admin-textarea');
@@ -740,6 +775,11 @@
 
         function renderCart() {
             cart.innerHTML = '';
+
+            // Uppdatera badge med antal varor
+            const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            cartBadge.textContent = totalItems > 0 ? totalItems : '';
+
             cartItems.forEach(item => {
                 const cartItemElement = document.createElement('div');
                 cartItemElement.className = 'cart-item';
@@ -825,7 +865,7 @@
                 historyLink.style.cursor = 'default';
                 historyLink.style.color = '#999';
             } else {
-                historyLink.textContent = `Visa ${orderHistory.length} ${orderHistory.length === 1 ? 'order' : 'ordrar'}`;
+                historyLink.textContent = `Visa ${orderHistory.length} tidigare ${orderHistory.length === 1 ? 'order' : 'ordrar'}`;
                 historyLink.style.cursor = 'pointer';
                 historyLink.style.color = '#B8123D';
             }
