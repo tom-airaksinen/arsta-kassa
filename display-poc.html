@@ -35,8 +35,22 @@
             height: 60px;
         }
 
-        .header .cafemeny-logo {
-            height: 40px;
+        .header .club-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #B8123D;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .order-section {
@@ -152,28 +166,102 @@
             font-size: 42px;
             font-weight: bold;
         }
+
+        /* Desktop-layout: QR till höger, större text */
+        @media (min-width: 800px) {
+            body {
+                max-width: 1200px;
+                padding: 30px 40px;
+            }
+
+            .header .club-logo {
+                height: 80px;
+            }
+
+            .header .club-title {
+                font-size: 36px;
+            }
+
+            .main-content {
+                flex-direction: row;
+                gap: 40px;
+                align-items: flex-start;
+            }
+
+            .left-column {
+                flex: 1;
+            }
+
+            .order-title {
+                font-size: 24px;
+                text-align: left;
+            }
+
+            .cart-item {
+                font-size: 26px;
+                padding: 15px 0;
+            }
+
+            .cart-item-price {
+                margin-left: 25px;
+            }
+
+            .empty-cart {
+                font-size: 24px;
+            }
+
+            .total-section {
+                padding: 25px;
+            }
+
+            .total-label {
+                font-size: 20px;
+            }
+
+            .total-amount {
+                font-size: 52px;
+            }
+
+            .qr-section {
+                margin-top: 0;
+                padding: 30px;
+                min-width: 380px;
+            }
+
+            .qr-title {
+                font-size: 22px;
+            }
+
+            .qr-amount {
+                font-size: 42px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <img src="Logga.png" alt="Årsta AIK" class="club-logo">
-        <img src="cafemeny.png" alt="Cafémeny" class="cafemeny-logo">
+        <span class="club-title">Årsta AIK</span>
     </div>
 
-    <div class="order-section">
-        <div class="order-title">Din order</div>
-        <div class="cart-items" id="cart"></div>
-    </div>
+    <div class="main-content">
+        <div class="left-column">
+            <div class="order-section">
+                <div class="order-title">Din order</div>
+                <div class="cart-items" id="cart"></div>
+            </div>
 
-    <div class="total-section" id="total-section">
-        <div class="total-label">Att betala</div>
-        <div class="total-amount" id="total-amount">0 kr</div>
-    </div>
+            <div class="total-section" id="total-section">
+                <div class="total-label">Att betala</div>
+                <div class="total-amount" id="total-amount">0 kr</div>
+            </div>
+        </div>
 
-    <div class="qr-section" id="qr-section">
-        <div class="qr-title">Betala med Swish</div>
-        <div class="qr-container" id="qr-container"></div>
-        <div class="qr-amount" id="qr-amount"></div>
+        <div class="qr-section" id="qr-section">
+            <div class="qr-title">Betala med Swish</div>
+            <div class="qr-container" id="qr-container"></div>
+            <div class="qr-amount" id="qr-amount"></div>
+        </div>
     </div>
 
     <script>
