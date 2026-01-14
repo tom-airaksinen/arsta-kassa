@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kassaapparat</title>
+    <script src="qrcode.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -645,6 +646,44 @@
             font-size: 13px;
             color: #000;
         }
+
+        .swish-qr-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f7f0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .swish-qr-section.hidden {
+            display: none;
+        }
+
+        .swish-qr-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .swish-qr-container {
+            display: inline-block;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .swish-qr-container canvas,
+        .swish-qr-container img {
+            display: block;
+        }
+
+        .swish-qr-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -664,6 +703,11 @@
     <div class="cart-container">
         <div class="order-title">Order</div>
         <div class="cart-items" id="cart"></div>
+        <div class="swish-qr-section hidden" id="swish-qr-section">
+            <div class="swish-qr-title">Betala med Swish</div>
+            <div class="swish-qr-container" id="swish-qr"></div>
+            <div class="swish-qr-amount" id="swish-qr-amount"></div>
+        </div>
         <div class="history-link">
             <a id="history-link">Inga ordrar än</a>
         </div>
@@ -797,6 +841,10 @@
             }
         ];
 
+        // Swish-uppgifter
+        const SWISH_NUMBER = '1236828156';
+        const SWISH_MESSAGE = 'Sjöstadskaféet';
+
         const productsContainer = document.getElementById('products-container');
         const cart = document.getElementById('cart');
         const totalDisplay = document.getElementById('total');
@@ -825,8 +873,12 @@
         const helpModal = document.getElementById('help-modal');
         const closeHelpButton = document.getElementById('close-help-button');
         const searchResults = document.getElementById('search-results');
+        const swishQrSection = document.getElementById('swish-qr-section');
+        const swishQrContainer = document.getElementById('swish-qr');
+        const swishQrAmount = document.getElementById('swish-qr-amount');
 
         let cartItems = [];
+        let swishQrCode = null;
         let orderHistory = [];
         let productCategories = [];
         let searchSelectedIndex = 0;
@@ -1037,6 +1089,7 @@
             }
 
             updateTotal();
+            updateSwishQR();
         }
 
         function changeQuantity(name, change) {
@@ -1053,6 +1106,34 @@
         function updateTotal() {
             const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             totalDisplay.textContent = `Totalt: ${total} kr`;
+        }
+
+        function updateSwishQR() {
+            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            if (total === 0) {
+                swishQrSection.classList.add('hidden');
+                return;
+            }
+
+            swishQrSection.classList.remove('hidden');
+            swishQrAmount.textContent = `${total} kr`;
+
+            // Rensa tidigare QR-kod
+            swishQrContainer.innerHTML = '';
+
+            // Skapa Swish-payload med URL-enkodade svenska tecken
+            const payload = `C${SWISH_NUMBER};${total};${encodeURIComponent(SWISH_MESSAGE)};`;
+
+            // Generera ny QR-kod
+            swishQrCode = new QRCode(swishQrContainer, {
+                text: payload,
+                width: 150,
+                height: 150,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.L
+            });
         }
 
         function resetCart() {
