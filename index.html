@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kassaapparat</title>
     <script src="qrcode.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -890,6 +893,31 @@
         let productCategories = [];
         let searchSelectedIndex = 0;
 
+        // Firebase-konfiguration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmNoYcJm8WzrQVC0F1Q_6XCUGhvrOKD7Y",
+            authDomain: "kassa-e757b.firebaseapp.com",
+            databaseURL: "https://kassa-e757b-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "kassa-e757b",
+            storageBucket: "kassa-e757b.firebasestorage.app",
+            messagingSenderId: "419179767043",
+            appId: "1:419179767043:web:d6aa42b4398d99402b536"
+        };
+
+        // Initiera Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Synka kundvagn till Firebase för display-enheten
+        function syncToFirebase() {
+            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            database.ref('currentOrder').set({
+                items: cartItems,
+                total: total,
+                updatedAt: Date.now()
+            });
+        }
+
         // Funktion för att lägga till press-effekt
         function addPressEffect(element) {
             element.addEventListener('touchstart', function() {
@@ -1042,6 +1070,7 @@
             }
 
             renderCart();
+            syncToFirebase();
 
             // Animera kundvagnsikonen på mobil
             cartIcon.classList.remove('pulse');
@@ -1107,6 +1136,7 @@
                     cartItems = cartItems.filter(i => i.name !== name);
                 }
                 renderCart();
+                syncToFirebase();
             }
         }
 
@@ -1161,6 +1191,7 @@
 
             cartItems = [];
             renderCart();
+            syncToFirebase();
         }
 
         function renderOrderHistory() {
