@@ -66,6 +66,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            padding-bottom: 120px;
         }
 
         .order-section {
@@ -164,11 +165,17 @@
 
         .total-section {
             text-align: center;
-            padding: 12px 20px;
+            padding: 20px;
             background: #B8123D;
             color: white;
             border-radius: 8px;
-            margin-top: 20px;
+            position: fixed;
+            bottom: calc(20px + env(safe-area-inset-bottom));
+            left: calc(20px + env(safe-area-inset-left));
+            right: calc(20px + env(safe-area-inset-right));
+            max-width: calc(600px - 40px);
+            margin: 0 auto;
+            z-index: 100;
         }
 
         .total-section.no-items {
@@ -253,7 +260,12 @@
             }
 
             .total-section {
-                padding: 15px 25px;
+                position: static;
+                padding: 25px;
+                max-width: none;
+                left: auto;
+                right: auto;
+                bottom: auto;
             }
 
             .total-label {
