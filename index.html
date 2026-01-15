@@ -1186,7 +1186,7 @@
             if (cartItems.length === 0) return;
 
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+            const timeStr = now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const orderTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
             // Lägg till i början av arrayen istället för i slutet
