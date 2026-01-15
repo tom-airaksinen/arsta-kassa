@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- Röd bakgrund med rundade hörn -->
+  <rect width="192" height="192" rx="32" fill="#B8123D"/>
+
+  <!-- Skärm/monitor-ikon -->
+  <rect x="36" y="46" width="120" height="76" rx="8" fill="white"/>
+  <rect x="44" y="54" width="104" height="60" rx="4" fill="#B8123D"/>
+
+  <!-- Skärmfot -->
+  <rect x="80" y="122" width="32" height="12" fill="white"/>
+  <rect x="64" y="134" width="64" height="12" rx="4" fill="white"/>
+</svg>
