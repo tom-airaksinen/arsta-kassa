@@ -605,6 +605,25 @@
             max-width: 600px;
         }
 
+        @media (max-width: 699px) {
+            #cart-modal .modal-content {
+                display: flex;
+                flex-direction: column;
+                max-height: 90vh;
+                margin: 5vh auto;
+            }
+
+            #cart-modal-items {
+                overflow-y: auto;
+                flex: 1;
+                margin-bottom: 10px;
+            }
+
+            #cart-modal .modal-buttons {
+                flex-shrink: 0;
+            }
+        }
+
         .modal-content h2 {
             margin-top: 0;
             color: #000;
