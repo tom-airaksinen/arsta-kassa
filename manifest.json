@@ -2,7 +2,7 @@
   "name": "Årsta AIK Kassa",
   "short_name": "Kassa",
   "description": "Kassaapp för Årsta AIK",
-  "start_url": "./",
+  "start_url": "./kassa.html",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#f8f8f8",
