@@ -1335,10 +1335,10 @@
         historyLink.onclick = openHistoryModal;
         closeHistoryButton.onclick = closeHistoryModal;
 
-        // Cart modal för mobil
+        // Scrolla till ordersektion på mobil
         stickyFooter.onclick = (e) => {
             if (isMobile() && e.target !== resetButton) {
-                openCartModal();
+                document.querySelector('.cart-container').scrollIntoView({ behavior: 'smooth' });
             }
         };
         cartModalClose.onclick = closeCartModal;
