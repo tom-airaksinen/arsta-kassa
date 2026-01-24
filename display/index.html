@@ -156,6 +156,19 @@
             display: block;
         }
 
+        /* Mobilanpassning */
+        @media (max-width: 500px) {
+            .qr-container canvas,
+            .qr-container img {
+                width: 150px !important;
+                height: 150px !important;
+            }
+
+            .qr-section {
+                margin-bottom: 120px;
+            }
+        }
+
         .qr-amount {
             font-size: 36px;
             font-weight: bold;
