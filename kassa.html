@@ -515,6 +515,27 @@
             padding: 20px;
         }
 
+        .history-tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .history-tab {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px 0;
+            color: #999;
+        }
+
+        .history-tab.active {
+            color: #B8123D;
+            border-bottom: 2px solid #B8123D;
+            font-weight: bold;
+        }
+
         .search-modal-content {
             padding: 20px;
             max-width: 400px;
@@ -906,6 +927,7 @@
         let orderHistory = [];
         let productCategories = [];
         let searchSelectedIndex = 0;
+        let historyViewMode = 'orders'; // 'orders' eller 'statistics'
 
         // Firebase-konfiguration
         const firebaseConfig = {
@@ -1260,6 +1282,23 @@
                 return;
             }
 
+            // Toggle-knappar
+            const tabsDiv = document.createElement('div');
+            tabsDiv.className = 'history-tabs';
+            tabsDiv.innerHTML = `
+                <button class="history-tab${historyViewMode === 'orders' ? ' active' : ''}" data-mode="orders">Ordrar</button>
+                <button class="history-tab${historyViewMode === 'statistics' ? ' active' : ''}" data-mode="statistics">Statistik</button>
+            `;
+            historyModalList.appendChild(tabsDiv);
+
+            // Lägg till klicklyssnare på tabbar
+            tabsDiv.querySelectorAll('.history-tab').forEach(tab => {
+                tab.onclick = () => {
+                    historyViewMode = tab.dataset.mode;
+                    renderOrderHistory();
+                };
+            });
+
             // Beräkna och visa total försäljning
             const totalSales = orderHistory.reduce((sum, order) => sum + order.total, 0);
             const summaryDiv = document.createElement('div');
@@ -1267,6 +1306,15 @@
             summaryDiv.innerHTML = `<div style="font-size: 14px; color: #666; margin-bottom: 5px;">Total försäljning (${orderHistory.length} ${orderHistory.length === 1 ? 'order' : 'ordrar'})</div><div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${totalSales} kr</div>`;
             historyModalList.appendChild(summaryDiv);
 
+            // Rendera rätt vy
+            if (historyViewMode === 'statistics') {
+                renderStatisticsView();
+            } else {
+                renderOrdersView();
+            }
+        }
+
+        function renderOrdersView() {
             orderHistory.forEach(order => {
                 const receipt = document.createElement('div');
                 receipt.className = 'receipt';
@@ -1289,9 +1337,44 @@
             });
         }
 
+        function renderStatisticsView() {
+            // Aggregera alla items per produktnamn
+            const productStats = {};
+            orderHistory.forEach(order => {
+                order.items.forEach(item => {
+                    if (!productStats[item.name]) {
+                        productStats[item.name] = { quantity: 0, total: 0, price: item.price };
+                    }
+                    productStats[item.name].quantity += item.quantity;
+                    productStats[item.name].total += item.quantity * item.price;
+                });
+            });
+
+            // Konvertera till array och sortera fallande på antal, alfabetiskt vid lika
+            const sortedProducts = Object.entries(productStats)
+                .map(([name, stats]) => ({ name, ...stats }))
+                .sort((a, b) => b.quantity - a.quantity || a.name.localeCompare(b.name, 'sv'));
+
+            // Rendera kompakt lista
+            sortedProducts.forEach(product => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'receipt-item';
+                itemDiv.style.padding = '8px 0';
+                itemDiv.style.borderBottom = '1px solid #eee';
+                itemDiv.innerHTML = `
+                    <span class="receipt-item-name">${product.quantity}x ${product.name}</span>
+                    <span class="receipt-item-subtotal">${product.total} kr</span>
+                `;
+                historyModalList.appendChild(itemDiv);
+            });
+        }
+
         function openHistoryModal() {
             if (orderHistory.length > 0) {
+                historyViewMode = 'orders';
+                renderOrderHistory();
                 historyModal.style.display = 'block';
+                historyModal.querySelector('.history-modal-content').scrollTop = 0;
             }
         }
 
