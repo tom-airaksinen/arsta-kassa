@@ -508,6 +508,17 @@
             font-weight: 500;
         }
 
+        .stat-quantity {
+            display: inline-block;
+            width: 50px;
+            text-align: right;
+            margin-right: 8px;
+        }
+
+        .stat-product-name {
+            flex: 1;
+        }
+
         .empty-state {
             color: #999;
             font-style: italic;
@@ -1362,7 +1373,7 @@
                 itemDiv.style.padding = '8px 0';
                 itemDiv.style.borderBottom = '1px solid #eee';
                 itemDiv.innerHTML = `
-                    <span class="receipt-item-name">${product.quantity}x ${product.name}</span>
+                    <span class="stat-quantity">${product.quantity}x</span><span class="stat-product-name">${product.name}</span>
                     <span class="receipt-item-subtotal">${product.total} kr</span>
                 `;
                 historyModalList.appendChild(itemDiv);
