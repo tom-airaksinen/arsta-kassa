@@ -1227,6 +1227,13 @@
                 return;
             }
 
+            // Beräkna och visa total försäljning
+            const totalSales = orderHistory.reduce((sum, order) => sum + order.total, 0);
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.cssText = 'background: #f0f7f0; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;';
+            summaryDiv.innerHTML = `<div style="font-size: 14px; color: #666; margin-bottom: 5px;">Total försäljning (${orderHistory.length} ${orderHistory.length === 1 ? 'order' : 'ordrar'})</div><div style="font-size: 24px; font-weight: bold; color: #2e7d32;">${totalSales} kr</div>`;
+            historyModalList.appendChild(summaryDiv);
+
             orderHistory.forEach(order => {
                 const receipt = document.createElement('div');
                 receipt.className = 'receipt';
