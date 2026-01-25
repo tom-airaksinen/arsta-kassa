@@ -483,6 +483,7 @@
         .receipt-time {
             color: #666;
             font-size: 14px;
+            font-weight: bold;
         }
 
         .receipt-total {
@@ -971,6 +972,37 @@
             localStorage.setItem('productCategories', JSON.stringify(productCategories));
         }
 
+        function getTodayDateString() {
+            return new Date().toISOString().split('T')[0]; // "2026-01-25"
+        }
+
+        function loadOrderHistoryFromStorage() {
+            const stored = localStorage.getItem('orderHistory');
+            const storedDate = localStorage.getItem('orderHistoryDate');
+            const today = getTodayDateString();
+
+            // Rensa om det är en ny dag
+            if (storedDate !== today) {
+                orderHistory = [];
+                localStorage.setItem('orderHistoryDate', today);
+                localStorage.removeItem('orderHistory');
+                return;
+            }
+
+            if (stored) {
+                try {
+                    orderHistory = JSON.parse(stored);
+                } catch (e) {
+                    orderHistory = [];
+                }
+            }
+        }
+
+        function saveOrderHistoryToStorage() {
+            localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+            localStorage.setItem('orderHistoryDate', getTodayDateString());
+        }
+
         function categoriesToText() {
             let text = '';
             productCategories.forEach(category => {
@@ -1199,6 +1231,7 @@
                 items: cartItems.map(item => ({ ...item })),
                 total: orderTotal
             });
+            saveOrderHistoryToStorage();
 
             renderOrderHistory();
 
@@ -1537,6 +1570,12 @@
                 }
                 return;
             }
+            if (historyModal.style.display === 'block') {
+                if (e.key === 'Escape') {
+                    closeHistoryModal();
+                }
+                return;
+            }
 
             // Ignorera modifieringstangenter
             if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -1574,7 +1613,20 @@
             }
         };
 
+        // Synka orderhistorik mellan flikar
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'orderHistory') {
+                try {
+                    orderHistory = JSON.parse(e.newValue) || [];
+                } catch (err) {
+                    orderHistory = [];
+                }
+                renderOrderHistory();
+            }
+        });
+
         loadProductsFromStorage();
+        loadOrderHistoryFromStorage();
         renderProducts();
         renderOrderHistory();
     </script>
