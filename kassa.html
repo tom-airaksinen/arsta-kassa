@@ -939,6 +939,7 @@
         let productCategories = [];
         let searchSelectedIndex = 0;
         let historyViewMode = 'orders'; // 'orders' eller 'statistics'
+        let lastSyncedUpdate = 0; // Spårar senaste synk för tvåvägssynk
 
         // Firebase-konfiguration
         const firebaseConfig = {
@@ -958,12 +959,24 @@
         // Synka kundvagn till Firebase för display-enheten
         function syncToFirebase() {
             const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const now = Date.now();
+            lastSyncedUpdate = now; // Sätt innan Firebase-anrop för att undvika att reagera på egen uppdatering
             database.ref('currentOrder').set({
                 items: cartItems,
                 total: total,
-                updatedAt: Date.now()
+                updatedAt: now
             });
         }
+
+        // Lyssna på ändringar från andra kassor (tvåvägssynk)
+        database.ref('currentOrder').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.updatedAt > lastSyncedUpdate) {
+                lastSyncedUpdate = data.updatedAt;
+                cartItems = data.items || [];
+                renderCart();
+            }
+        });
 
         // Funktion för att lägga till press-effekt
         function addPressEffect(element) {
